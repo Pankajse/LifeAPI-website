@@ -5,9 +5,7 @@ const cookieParser = require("cookie-parser");
 const userRoutes = require("./routes/user.route")
 const orgRoutes = require("./routes/org.route");
 const locationRoutes = require("./routes/location.route");
-// const chatbotRoutes = require("./routes/chatbot.route")
 const bloodRoutes = require("./routes/blood.route")
-// const chatRoutes = require('./routes/chat.route');
 
 const app = express();
 mongoose.connect(process.env.DB_URL,{useNewUrlParser : true,useUnifiedTopology : true})

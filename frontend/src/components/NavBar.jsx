@@ -8,6 +8,7 @@ const NavBar = () => {
     const navigate = useNavigate();
     const isDesktop = useMediaQuery("(min-width : 768px)");
     const [openHeader, setOpenHeader] = useState(false);
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
         setOpenHeader(isDesktop);
@@ -58,10 +59,16 @@ const NavBar = () => {
                     {headerElements}
 
                     <span
-                        onClick={() => handleNavClick("#centers")}
+                        onClick={() =>{ 
+                            if(token){
+                                handleNavClick("#centers");
+                            }else{
+                                navigate('/signin');
+                            }        
+                        }}
                         className="text-white hover:cursor-pointer px-2 py-1 w-full h-8 bg-red-600 hover:bg-red-700 rounded-lg"
                     >
-                        Donate Now
+                        {token ? "Donate Now" : "Sign In"}
                     </span>
                 </div>
             )}

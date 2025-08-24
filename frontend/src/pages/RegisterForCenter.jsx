@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const RegisterForCenter = () => {
     const bloodGroups = ["A+", "B+", "AB+", "O+", "A-", "B-", "AB-", "O-"]
+    const navigate = useNavigate();
     const [org, setOrg] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [formId, setFormId] = useState(null);
@@ -102,7 +103,13 @@ const RegisterForCenter = () => {
                 <div className="mt-6">
                     {!formId ? (
                         <button
-                            onClick={() => setShowForm(true)}
+                            onClick={() => {
+                                const token = localStorage.getItem('token');
+                                if(!token){
+                                    navigate('/signin');
+                                }
+                                setShowForm(true)
+                            }}
                             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full"
                         >
                             Register
