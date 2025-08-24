@@ -1,6 +1,6 @@
 import whitelogo from '../assets/lifeapi_logo_white.png';
 import redlogo from '../assets/lifeapi_logo_red.png';
-import Input1 from '../components/input1';
+import Input1 from '../components/Input1';
 import Button1 from '../components/Button1';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
