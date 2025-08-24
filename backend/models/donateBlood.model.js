@@ -20,12 +20,12 @@ const donateBloodSchema = new Schema({
     lastDonationDate: {
         type: Date,
         default: null,
-        max: new Date()
+        max: new Date(),
+        set: (val) => val ? new Date(val) : null
     },
     phone: {
         type: String,
         required: true,
-        unique: true,
         match: [/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number'],
         set: value => value.replace(/[^0-9+]/g, '')
     },

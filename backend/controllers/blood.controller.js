@@ -1,11 +1,12 @@
 
 const { default: mongoose } = require("mongoose");
 const bloodServices = require("../services/blood.service");
+const StoryModel = require("../models/story.model");
 
 module.exports.getEvents = async (req, res) => {
     try {
-        const {range , type, daysRange} = req.body;
-        const events = await bloodServices.getEvents( range, type, daysRange);
+        const {range , types, daysRange} = req.body;
+        const events = await bloodServices.getEvents( range, types, daysRange);
         if (!events) {
             return res.status(404).json({ msg: "No events found" });
         }
@@ -18,9 +19,11 @@ module.exports.getEvents = async (req, res) => {
 module.exports.getEventById = async (req, res) => {
     try {
         const eventId = req.params.eventId;
+        console.log(eventId)
         if (!mongoose.Types.ObjectId.isValid(eventId)) {
             return res.status(400).json({ msg: "Invalid event ID" });
         }
+        console.log(eventId)
         const event = await bloodServices.getEventById(eventId);
         if (!event) {
             return res.status(404).json({ msg: "Event not found" });
@@ -30,6 +33,61 @@ module.exports.getEventById = async (req, res) => {
     catch (error) {
         res.status(500).json({ msg: "Internal server error", error: error.message
         });
+    }
+};
+
+module.exports.allOrgs = async (req, res) => {
+    try {
+        const {location, maxDistance} = req.body;
+        const query = {};
+        if (location) {
+            query.location = location;
+        }
+        if (maxDistance) {
+            query.maxDistance = maxDistance;
+        }else{
+            query.maxDistance = 100;
+        }
+        const orgs = await bloodServices.allOrgs(query);
+        if (!orgs) {
+            return res.status(404).json({ msg: "No organizations found" });
+        }
+        res.status(200).json({ msg: "Organizations fetched successfully", orgs });
+    } catch (error) {
+        res.status(500).json({ msg: "Internal server error", error: error.message
+        });
+    }
+};
+
+module.exports.getOrgById = async (req, res) => {
+    try {
+        const orgId = req.params.orgId;
+        if (!mongoose.Types.ObjectId.isValid(orgId)) {
+            return res.status(400).json({ msg: "Invalid organization ID" });
+        }
+        const org = await bloodServices.getOrgById(orgId);
+        if (!org) {
+            return res.status(404).json({ msg: "Organization not found" });
+        }
+        res.status(200).json({ msg: "Organization fetched successfully", org });
+    } catch (error) {
+        res.status(500).json({ msg: "Internal server error", error: error.message });
+    }
+};
+
+module.exports.getAllStories = async (req, res) => {
+    try {
+        const stories = await StoryModel.find().populate("user", "fullname email");
+        const filteredStories = stories.map(x => ({
+            name : x.user.fullname,
+            imageUrl : "https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg",
+            comment : x.story,
+            tag : x.tag,
+            timeStamp : x.createdAt.toDateString()
+        }))
+        res.status(200).json({ msg: "Stories fetched successfully", stories : filteredStories });
+    } catch (error) {
+        res.status(500).json({ msg: "Internal server error", error: error.message });
     }
 };
 

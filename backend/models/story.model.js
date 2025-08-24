@@ -12,7 +12,7 @@ const storySchema = new mongoose.Schema({
     story : {
         type : String,
         required : true,
-        minLength: [10, "Story should be at least 10 characters long"]
+        minLength: [5, "Story should be at least 10 characters long"]
     }
 },
 {

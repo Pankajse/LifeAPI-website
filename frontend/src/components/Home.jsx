@@ -1,7 +1,9 @@
 import React from 'react'
 import bloodDonationImage from "../assets/blood-donation-image.jpg"
+import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
+    const navigate = useNavigate();
     const numbers = [
         {
             mainText:"50,000+",
@@ -22,12 +24,12 @@ const Home = () => {
                 <h3 className='text-4xl sm:text-6xl font-bold '>Give the Gift of <span className='text-red-600'>Life</span></h3>
                 <p className='text-xl sm:text-2xl text-[#696969] font-normal text-center'>Every donation can save up to three lives. Join our community of heroes and make a difference in someone's life today.</p>
                 <div className='flex flex-col sm:flex-row gap-8 justify-center items-center '>
-                    <button className='text-white text-xl font-semibold hover:cursor-pointer py-1 px-2 w-full max-w-sm bg-red-600 hover:bg-red-700 transition-all duration-200 rounded-full '>
-                        Schedule Donation
-                    </button>
-                    <a href='#footer' className=' hover:cursor-pointer hover:text-white hover:bg-red-600 text-xl font-medium py-1 w-full md:w-fit px-8 max-w-sm border-2 border-red-600 text-red-600 rounded-full '>
-                        Contact Us
+                    <a href='#events' className='text-white text-xl text-center font-semibold hover:cursor-pointer py-1 px-2 w-full max-w-sm bg-red-600 hover:bg-red-700 transition-all duration-200 rounded-full '>
+                        Register for Event
                     </a>
+                    <button onClick={()=>{navigate('/about')}} className=' hover:cursor-pointer hover:text-white hover:bg-red-600 text-xl font-medium py-1 w-full md:w-fit px-8 max-w-sm border-2 border-red-600 text-red-600 rounded-full '>
+                        About Us
+                    </button>
                 </div>
                 <div className='flex gap-5 flex-row justify-around px-2 '>
                         {numbers.map((x,i)=><div key={i}>

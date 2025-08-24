@@ -13,7 +13,6 @@ router.use(userAuth);
 
 router.post("/story", userController.createStory);
 router.get("/yourstory", userController.yourStory);
-router.get("/stories", userController.getAllStories);
 router.delete("/story/:storyId", userController.deleteStory);
 router.put("/story/:storyId", userController.updateStory);
 

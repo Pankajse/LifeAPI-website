@@ -1,46 +1,88 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const Events = () => {
+    // This would typically come from an API
     const bloodDriveEvents = [
         {
-            title: "Community Center Blood Drive",
-            date: "Saturday, December 16, 2023",
-            time: "9:00 AM - 4:00 PM",
-            venue: "Riverside Community Center",
-            address: "123 Community Ave, Riverside, ST 12345",
-            organizer: "Riverside Rotary Club",
-            goal: "50 donations",
-            registered: "32 registered",
-            progress: 65,
+            title: "University Health Fair Drive",
+            date: "September 5, 2025",
+            time: "11:00 AM - 5:00 PM",
+            venue: "Central University Campus",
+            address: "100 University Plaza, College Town, ST 12350",
+            organizer: "University Health Services",
+            goal: "100 donations",
+            registered: "45 registered",
+            progress: 45,
             status: "Appointments Available"
         },
         {
-            title: "Corporate Blood Drive - TechCorp",
-            date: "Tuesday, December 19, 2023",
-            time: "10:00 AM - 6:00 PM",
-            venue: "TechCorp Headquarters",
-            address: "456 Innovation Drive, Tech Park, ST 12348",
-            organizer: "TechCorp Employee Council",
-            goal: "75 donations",
-            registered: "34 registered",
-            progress: 45,
+            title: "Downtown Office Building Blood Drive",
+            date: "October 1, 2025",
+            time: "8:00 AM - 2:00 PM",
+            venue: "Metropolis Tower Lobby",
+            address: "200 Business Rd, Downtown, ST 12355",
+            organizer: "City Blood Bank",
+            goal: "60 donations",
+            registered: "15 registered",
+            progress: 25,
             status: "Open to Public"
         },
-        {
-            title: "Corporate Blood Drive - TechCorp",
-            date: "Tuesday, December 19, 2023",
-            time: "10:00 AM - 6:00 PM",
-            venue: "TechCorp Headquarters",
-            address: "456 Innovation Drive, Tech Park, ST 12348",
-            organizer: "TechCorp Employee Council",
-            goal: "75 donations",
-            registered: "34 registered",
-            progress: 45,
-            status: "Open to Public"
+         {
+            title: "Winter Charity Blood Drive",
+            date: "December 10, 2025",
+            time: "10:00 AM - 4:00 PM",
+            venue: "Grand Hall Events Center",
+            address: "300 Celebration Ave, City Center, ST 12360",
+            organizer: "Community Charity Foundation",
+            goal: "120 donations",
+            registered: "20 registered",
+            progress: 17,
+            status: "Appointments Available"
         }
     ];
+
+    const [filterDetails, setFilterDetails] = useState({
+        dateRange: 'all', // Default to 'all'
+        location: '',
+        EventType: []
+    });
+
+    const [filteredEvents, setFilteredEvents] = useState(bloodDriveEvents);
+
+    const handleFilterChange = (filterName, value) => {
+        setFilterDetails(prevDetails => ({
+            ...prevDetails,
+            [filterName]: value
+        }));
+    };
+    
+    // Effect to apply filters when filterDetails change
+    useEffect(() => {
+        let events = [...bloodDriveEvents];
+
+        // Date Range Filter Logic
+        if (filterDetails.dateRange && filterDetails.dateRange !== 'all') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to the start of the day
+
+            const maxDate = new Date(today);
+            maxDate.setDate(today.getDate() + parseInt(filterDetails.dateRange, 10));
+
+            events = events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate >= today && eventDate <= maxDate;
+            });
+        }
+        
+        // Add other filter logic for location and EventType here in the future
+
+        setFilteredEvents(events);
+
+    }, [filterDetails, bloodDriveEvents]);
+
+
     return (
         <section id="events" className='flex flex-col gap-12 justify-center items-center scroll-mt-20 my-14 sm:px-16 lg:px-20 xl:px-36 px-4'>
             <h2 className='text-3xl sm:text-4xl font-bold'>Upcoming Blood Drives</h2>
@@ -49,92 +91,86 @@ const Events = () => {
             <div className='w-full flex flex-col lg:flex-row gap-8'>
                 {/* Filter enents */}
                 <div className=' w-full lg:w-lg bg-gray-50 p-6 rounded-3xl h-fit lg:sticky lg:top-24 self-start '>
-                    <h4 className='text-xl font-semibold'>Filter Events</h4>
-                    <DropdownFunction mainType="Date Range" options={[
-                        {
-                            text: "Next 7 days",
-                            value: 7
-                        },
-                        {
-                            text: "Next 30 days",
-                            value: 30
-                        },
-                        {
-                            text: "Next 3 months",
-                            value: 90
-                        },
-                    ]} />
+                    <h4 className='text-xl font-semibold mb-4'>Filter Events</h4>
+                    <div className='flex flex-col gap-4'>
 
-                    <DropdownFunction mainType="Locations" options={[
-                        {
-                            text: "All locations",
-                            value: 50
-                        },
-                        {
-                            text: "Within 10 kms",
-                            value: 10
-                        },
-                        {
-                            text: "Within 20 kms",
-                            value: 20
-                        },
-                        {
-                            text: "Within 30 kms",
-                            value: 30
-                        },
-                    ]} />
+                        <DropdownFunction
+                            mainType="Date Range"
+                            value={filterDetails.dateRange}
+                            onChange={(value) => handleFilterChange('dateRange', value)}
+                            options={[
+                                { text: "All upcoming", value: 'all' },
+                                { text: "Next 7 days", value: 7 },
+                                { text: "Next 30 days", value: 30 },
+                                { text: "Next 3 months", value: 90 },
+                            ]}
+                        />
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
-                        <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="community"
-                                    defaultChecked
-                                    className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
-                                />
-                                <label
-                                    htmlFor="community"
-                                    className="text-sm text-gray-700 cursor-pointer"
-                                >
-                                    Community Drives
-                                </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="corporate"
-                                    defaultChecked
-                                    className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
-                                />
-                                <label
-                                    htmlFor="corporate"
-                                    className="text-sm text-gray-700 cursor-pointer"
-                                >
-                                    Corporate Events
-                                </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="school"
-                                    defaultChecked
-                                    className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
-                                />
-                                <label
-                                    htmlFor="school"
-                                    className="text-sm text-gray-700 cursor-pointer"
-                                >
-                                    School Drives
-                                </label>
+                        <DropdownFunction
+                            mainType="Locations"
+                            // Connect value and onChange for location filter here
+                            options={[
+                                { text: "All locations", value: 50 },
+                                { text: "Within 10 kms", value: 10 },
+                                { text: "Within 20 kms", value: 20 },
+                                { text: "Within 30 kms", value: 30 },
+                            ]}
+                        />
+                        
+                        {/* Checkbox filter section (remains the same) */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
+                            <div className="space-y-2">
+                                {/* Community Drives Checkbox */}
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="community"
+                                        defaultChecked
+                                        className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
+                                    />
+                                    <label htmlFor="community" className="text-sm text-gray-700 cursor-pointer">
+                                        Community Drives
+                                    </label>
+                                </div>
+                                {/* Corporate Events Checkbox */}
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="corporate"
+                                        defaultChecked
+                                        className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
+                                    />
+                                    <label htmlFor="corporate" className="text-sm text-gray-700 cursor-pointer">
+                                        Corporate Events
+                                    </label>
+                                </div>
+                                {/* School Drives Checkbox */}
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="school"
+                                        defaultChecked
+                                        className="border-2 border-blue-500 rounded data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 "
+                                    />
+                                    <label htmlFor="school" className="text-sm text-gray-700 cursor-pointer">
+                                        School Drives
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 {/* Events detail */}
-                <div className='w-full flex flex-col gap-3 items-center  '>
-                    {bloodDriveEvents.map((event, i) => <EventsCard key={i} event={event} />)}
-                    <button className='bg-gray-200 hover:cursor-pointer hover:text-blue-500 hover:bg-blue-50 text-base font-normal py-1 w-full px-8 sm:w-fit border border-gray-200 text-black rounded-full '>
-                        <h5>Load More Events</h5>
-                    </button>
+                <div className='w-full flex flex-col gap-3 items-center'>
+                    {filteredEvents.length > 0 ? (
+                         filteredEvents.map((event, i) => <EventsCard key={i} event={event} />)
+                    ) : (
+                        <p className="text-gray-500 mt-10">No events match your current filters.</p>
+                    )}
+                    
+                    {filteredEvents.length > 0 && (
+                        <button className='bg-gray-200 hover:cursor-pointer hover:text-blue-500 hover:bg-blue-50 text-base font-normal py-1 w-full px-8 sm:w-fit border border-gray-200 text-black rounded-full '>
+                            <h5>Load More Events</h5>
+                        </button>
+                    )}
                 </div>
             </div>
         </section>
@@ -143,6 +179,7 @@ const Events = () => {
 
 
 const EventsCard = ({ event }) => {
+    // This component remains unchanged
     return <div className='mb-10 p-6 rounded-3xl w-full shadow-xl border border-gray-200'>
         <h4 className='text-xl font-semibold '>{event.title}</h4>
         <div className='flex flex-col md:flex-row justify-between'>
@@ -199,21 +236,23 @@ const EventsCard = ({ event }) => {
     </div>
 }
 
-const DropdownFunction = ({ mainType, options }) => {
-    const [selected, setSelected] = useState(options[options.length - 1].value)
-
+// MODIFIED: DropdownFunction is now a controlled component
+const DropdownFunction = ({ mainType, options, value, onChange }) => {
+    // The component no longer holds its own state.
+    // It receives 'value' and 'onChange' from the parent.
+    
     return (
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 {mainType}
             </label>
 
-            <Select value={selected} onValueChange={setSelected}>
+            <Select value={value} onValueChange={onChange}>
                 <SelectTrigger
                     className="
-            w-full rounded-2xl
-            focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-offset-0 focus:border-blue-500
-          "
+                    w-full rounded-2xl
+                    focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-offset-0 focus:border-blue-500
+                    "
                 >
                     <SelectValue placeholder="Select option" />
                 </SelectTrigger>
@@ -224,11 +263,11 @@ const DropdownFunction = ({ mainType, options }) => {
                             key={i}
                             value={x.value}
                             className="
-                w-full font-normal
-                hover:bg-blue-50 hover:text-blue-600
-                data-[state=checked]:bg-blue-100
-                focus:bg-blue-100
-              "
+                                w-full font-normal
+                                hover:bg-blue-50 hover:text-blue-600
+                                data-[state=checked]:bg-blue-100
+                                focus:bg-blue-100
+                            "
                         >
                             {x.text}
                         </SelectItem>
@@ -239,4 +278,4 @@ const DropdownFunction = ({ mainType, options }) => {
     )
 }
 
-export default Events
+export default Events;

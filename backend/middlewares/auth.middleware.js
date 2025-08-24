@@ -5,9 +5,7 @@ const  UserModel  = require('../models/user.model');
 const OrgModel = require("../models/org.model");
 
 module.exports.auth = async (req, res, next) => {
-    const token =
-        req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
-
+    const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
     if (!token) {
         return res.status(401).json({ msg: "Unauthorized access" });
     }
@@ -27,9 +25,10 @@ module.exports.auth = async (req, res, next) => {
         if (user) {
             req.user = user;
             req.type = "User";
+            console.log("user");
             return next();
         }
-
+        
         // If no user found, try to find organization
         const org = await OrgModel.findById(decoded._id);
         if (org) {
@@ -40,6 +39,7 @@ module.exports.auth = async (req, res, next) => {
 
         // If neither found, return unauthorized
         return res.status(401).json({ msg: "Unauthorized access" });
+      
 
     } catch (error) {
         return res.status(401).json({ msg: "Unauthorized access" });

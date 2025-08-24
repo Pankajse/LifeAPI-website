@@ -1,68 +1,122 @@
 const DonateBloodModel = require("../models/donateBlood.model");
 const EventModel = require("../models/event.model");
 const MatchModel = require("../models/match.model");
+const OrgModel = require("../models/org.model");
 const RequestBloodModel = require("../models/requestBlood.model");
 const { getAddressCoordinates, getUsersInTheRadius, getOrgsInTheRadius, getDistanceTime } = require("./location.service");
 
-const getEvents = async (range, type, daysRange) => {
+const getEvents = async (range, types, daysRange) => {
     const query = {};
-    if (type) {
-        query.type = type;
+    let events;
+
+    // ✅ type filter
+    if (types && types.length > 0) {
+        query.type = { $in: types };
     }
+
+    // ✅ days filter
     if (daysRange) {
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(startDate.getDate() + Number(daysRange));
-        query.date = {
-            $gte: startDate,
-            $lte: endDate
-        };
+        query.date = { $gte: startDate, $lte: endDate };
+        query.status = { $in: ['upcoming', 'ongoing'] };
     }
-    if (range) {
-        const { coordinates } = range;
+
+    // ✅ location + range filter
+    if (range && range.coordinates && range.radius) {
         query.location = {
             $near: {
                 $geometry: {
                     type: "Point",
-                    coordinates: [coordinates.lng, coordinates.ltd]
+                    coordinates: [range.coordinates.lng, range.coordinates.lat]
                 },
-                $maxDistance: range.radius * 1000
+                $maxDistance: range.radius * 1000 // KM → meters
             }
         };
+    } else {
+        events = await EventModel.find(query).sort({ date: 1 }).populate("organizerId", "orgName contactNumber email ");
+        const filteredEvents = events.map(event => ({
+            title: event.title,
+            date: event.date.toDateString(),
+            time: event.time,
+            venue: event.venue,
+            address: event.location.address,
+            organizer: event.organizerId.orgName,
+            goal: event.goal,
+            registered: event.registered,
+            progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
+            status: event.status,
+            description: event.description,
+            id: event._id
+        }));
+        return filteredEvents;
     }
-    const events = await EventModel.find(query).sort({ date: 1 });
-    return events;
-}
+
+    events = await EventModel.find(query).sort({ date: 1 }).populate("organizerId", "orgName contactNumber email ");
+    const filteredEvents = events.map(event => ({
+        title: event.title,
+        date: event.date.toDateString(),
+        time: event.time,
+        venue: event.venue,
+        address: event.location.address,
+        organizer: event.organizerId.orgName,
+        goal: event.goal,
+        registered: event.registered,
+        progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
+        status: event.status,
+        description: event.description,
+        id: event._id
+    }));
+    return filteredEvents;
+};
+
+
 
 const getEventById = async (eventId) => {
-    const event = await EventModel.findById(eventId);
+    const event = await EventModel.findById(eventId).populate("organizerId", "orgName contactNumber email ");
     if (!event) {
         throw new Error("Event not found");
     }
-    return event;
+    const filteredEvent = {
+        title: event.title,
+        date: event.date.toDateString(),
+        time: event.time,
+        venue: event.venue,
+        address: event.location.address,
+        organizer: event.organizerId.orgName,
+        goal: event.goal,
+        registered: event.registered,
+        progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
+        status: event.status,
+        description: event.description,
+        id: event._id
+    }
+    return filteredEvent;
 }
 
-const getDonateBloodForms = async (eventId,orgId) => {
+const getDonateBloodForms = async (eventId, orgId) => {
     if (!eventId) {
         throw new Error("Event ID is required");
     }
-    const event = await EventModel.find({_id : eventId,organizerId : orgId});
+    const event = await EventModel.find({ _id: eventId, organizerId: orgId });
     if (!event) {
         throw new Error("Event not found");
     }
-    const donateBloodForms = await DonateBloodModel.find({eventId : eventId}).populate("user", "fullname email");
+    const donateBloodForms = await DonateBloodModel.find({ eventId: eventId }).populate("user", "fullname email");
     return donateBloodForms;
 }
 
-const donateBloodForm = async ({ user, fullname, bloodType, phone ,eventId,eventModel}) => {
-    if (!user || !fullname  || !bloodType || !phone || !eventId) {
+const donateBloodForm = async ({ user, fullname, bloodType, lastDonationDate ,phone, eventId, eventModel }) => {
+    if (!user || !fullname || !bloodType || !phone || !eventId) {
         throw new Error("All fields are Required");
     }
-    
+
     const donateBloodResponse = await DonateBloodModel.create({
         user,
         fullname,
         bloodType,
+        lastDonationDate,
         phone,
         eventId,
         eventModel
@@ -73,6 +127,62 @@ const donateBloodForm = async ({ user, fullname, bloodType, phone ,eventId,event
 const deleteDonateBloodForm = async ({ user, formId }) => {
     const response = await DonateBloodModel.deleteOne({ user, _id: formId })
     return response;
+}
+
+const allOrgs = async (query) => {
+    if (!query.location) {
+        const orgs = await OrgModel.find({ recievingBlood: true });
+        return orgs;
+    }
+    const pinCodeCoordinates = await getAddressCoordinates(query.location);
+    if (!pinCodeCoordinates) {
+        throw new Error("Invalid Pin Code");
+    }
+
+    const orgs = await OrgModel.aggregate([
+        {
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [pinCodeCoordinates.lng, pinCodeCoordinates.lat] // [lng, lat]
+                },
+                distanceField: "distance",
+                spherical: true,
+                maxDistance: query.maxDistance * 1000 // 30 km radius
+            }
+        },
+        {
+            $match: {
+                recievingBlood: true
+            }
+        },
+        {
+            $sort: {
+                distance: 1 // nearest first
+            }
+        }
+    ]);
+
+    return orgs;
+
+
+}
+
+const getOrgById = async (orgId) => {
+    const org = await OrgModel.findById(orgId);
+    if (!org) {
+        throw new Error("Organization not found");
+    }
+    const filteredOrg = {
+        OrgId : org._id,
+        orgType: org.orgType,
+        orgName: org.orgName,
+        contactNumber: org.contactNumber,
+        email: org.email,
+        address: org.location.address,
+        timings: org.timings,
+    }
+    return filteredOrg;
 }
 
 // const requestBloodForm = async ({ requesterId, bloodType, amount, address, description, urgencyLevel, requiredByDate }) => {
@@ -161,7 +271,9 @@ const deleteDonateBloodForm = async ({ user, formId }) => {
 module.exports = {
     getEvents,
     getEventById,
+    allOrgs,
     getDonateBloodForms,
     donateBloodForm,
-    deleteDonateBloodForm
+    deleteDonateBloodForm,
+    getOrgById
 };

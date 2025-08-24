@@ -3,10 +3,12 @@ const { auth } = require("../middlewares/auth.middleware");
 const bloodController = require("../controllers/blood.controller");
 const router = express.Router();
 
-router.use(auth);
 
-router.get("/events", bloodController.getEvents);
+router.post("/events", bloodController.getEvents);
 router.get("/events/:eventId", bloodController.getEventById);
+router.post("/allOrgs", bloodController.allOrgs);
+router.get("/org/:orgId", bloodController.getOrgById);
+router.get("/stories", bloodController.getAllStories);
 
 // router.post('/request-blood-form',bloodController.requestBloodform);
 // router.get('/nearby-donors-orgs',  bloodController.nearbydonorsOrgsByBloodType);

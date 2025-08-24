@@ -106,16 +106,13 @@ module.exports.yourStory = async (req, res) => {
         if (!story) {
             return res.status(404).json({ msg: "Story not found for this user" });
         }
-        res.status(200).json({ msg: "Story fetched successfully", story });
-    } catch (error) {
-        res.status(500).json({ msg: "Internal server error", error: error.message });
-    }
-};
-
-module.exports.getAllStories = async (req, res) => {
-    try {
-        const stories = await StoryModel.find().populate("user", "fullname email");
-        res.status(200).json({ msg: "Stories fetched successfully", stories });
+        const filteredStory = {
+            storyId : story._id,
+            story : story.story,
+            tag : story.tag,
+            timeStamp : story.createdAt.toDateString()
+        }
+        res.status(200).json({ msg: "Story fetched successfully", story:filteredStory });
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", error: error.message });
     }
