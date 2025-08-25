@@ -23,7 +23,7 @@ module.exports.registerUser = async (req, res, next) => {
         });
     }
     try {
-        const { fullname, email, password} = req.body;
+        const { fullname, email, password } = req.body;
         const user = await userService.createUser(fullname, email, password);
         const token = await user.generateAuthToken();
         if (!user) {
@@ -87,13 +87,13 @@ module.exports.signinUser = async (req, res, next) => {
 module.exports.createStory = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { tag,story } = req.body;
+        const { tag, story } = req.body;
         const existingStory = await StoryModel.findOne({ user: userId });
         if (existingStory) {
             return res.status(400).json({ msg: "Story already exists for this user" });
         }
-        const storyResponse = await StoryModel.create({ user: userId, tag , story });
-        res.status(201).json({ msg: "Story created successfully", story : storyResponse });
+        const storyResponse = await StoryModel.create({ user: userId, tag, story });
+        res.status(201).json({ msg: "Story created successfully", story: storyResponse });
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", error: error.message });
     }
@@ -107,12 +107,12 @@ module.exports.yourStory = async (req, res) => {
             return res.status(404).json({ msg: "Story not found for this user" });
         }
         const filteredStory = {
-            storyId : story._id,
-            story : story.story,
-            tag : story.tag,
-            timeStamp : story.createdAt.toDateString()
+            storyId: story._id,
+            story: story.story,
+            tag: story.tag,
+            timeStamp: story.createdAt.toDateString()
         }
-        res.status(200).json({ msg: "Story fetched successfully", story:filteredStory });
+        res.status(200).json({ msg: "Story fetched successfully", story: filteredStory });
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", error: error.message });
     }
@@ -136,16 +136,16 @@ module.exports.updateStory = async (req, res) => {
     try {
         const userId = req.user._id;
         const { storyId } = req.params;
-        const { tag , story } = req.body;
+        const { tag, story } = req.body;
         const storyResponse = await StoryModel.findOneAndUpdate(
             { _id: storyId, user: userId },
-            { tag , story },
+            { tag, story },
             { new: true, runValidators: true }
         );
         if (!storyResponse) {
             return res.status(404).json({ msg: "Story not found or not authorized" });
         }
-        res.status(200).json({ msg: "Story updated successfully", story : storyResponse });
+        res.status(200).json({ msg: "Story updated successfully", story: storyResponse });
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", error: error.message });
     }
@@ -169,14 +169,21 @@ module.exports.getDonateBloodForms = async (req, res) => {
 }
 
 module.exports.donateBloodform = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            message : errors.array()[0].msg || "Error in input",
+            errors: errors.array()
+        });
+    }
     try {
         const user = req.user;
         const eventId = req.params.eventId;
         if (!mongoose.Types.ObjectId.isValid(eventId)) {
             return res.status(400).json({ message: "Invalid Event Id" });
         }
-        const { fullname, bloodType , phone,lastDonationDate,eventModel } = req.body;
-        const donateForm = await bloodServices.donateBloodForm({ user: user._id,fullname, bloodType, phone,lastDonationDate, eventId,eventModel });
+        const { fullname, bloodType, phone, lastDonationDate, eventModel } = req.body;
+        const donateForm = await bloodServices.donateBloodForm({ user: user._id, fullname, bloodType, phone, lastDonationDate, eventId, eventModel });
         if (!donateForm) {
             return res.status(400).json({ message: "Form not Submitted" });
         }
@@ -191,10 +198,10 @@ module.exports.deleteDonateBloodForm = async (req, res) => {
     try {
         const user = req.user;
         const formId = req.body.formId;
-        if(!mongoose.Types.ObjectId.isValid(formId)){
-            return res.status(400).json({message : "Enter valid Form Id"})
+        if (!mongoose.Types.ObjectId.isValid(formId)) {
+            return res.status(400).json({ message: "Enter valid Form Id" })
         }
-        const response = await bloodServices.deleteDonateBloodForm({user : user._id,formId});
+        const response = await bloodServices.deleteDonateBloodForm({ user: user._id, formId });
         if (!response) {
             return res.status(404).json({ message: "Request not found" });
         }
@@ -215,7 +222,7 @@ module.exports.getDonateBloodFormEvent = async (req, res) => {
         if (!event) {
             return res.status(404).json({ message: "Event not found" });
         }
-        const donateBloodForm = await DonateBloodModel.find({ eventId: eventId , user: req.user._id })
+        const donateBloodForm = await DonateBloodModel.find({ eventId: eventId, user: req.user._id })
             .populate('user', 'fullname email phone')
             .sort({ createdAt: -1 });
         return res.status(200).json({

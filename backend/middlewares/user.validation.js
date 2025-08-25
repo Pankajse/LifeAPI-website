@@ -38,7 +38,7 @@ const userLoginValidationRules = [
 
 const userUpdateValidationRules = [
   body("fullname")
-  .optional()
+    .optional()
     .isString().withMessage("Name should be a string")
     .isLength({ min: 3 }).withMessage("Name should be more than 3 characters")
     .customSanitizer(value => {
@@ -50,7 +50,7 @@ const userUpdateValidationRules = [
 
   // Email
   body("email")
-  .optional()
+    .optional()
     .isEmail().withMessage("Enter a valid email")
     .isLength({ min: 8 }).withMessage("Email should be more than 8 characters")
     .normalizeEmail(),
@@ -139,18 +139,58 @@ const orgRegistrationValidationRules = [
 
 ];
 
-  const orgSigninValidationRules = [
-    body('email')
-      .notEmpty().withMessage('Email is required')
-      .isEmail().withMessage('Invalid email format')
-      .isLength({ min: 8 }).withMessage('Email should be more than 8 characters')
-      .normalizeEmail(),
+const orgSigninValidationRules = [
+  body('email')
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Invalid email format')
+    .isLength({ min: 8 }).withMessage('Email should be more than 8 characters')
+    .normalizeEmail(),
 
-    // password validation
-    body('password')
-      .notEmpty().withMessage('Password is required')
-      .isLength({ min: 8 }).withMessage('Password should be more than 8 characters'),
-  ]
+  // password validation
+  body('password')
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 8 }).withMessage('Password should be more than 8 characters'),
+]
+
+const donationForm = [
+  body('fullname')
+    .notEmpty().withMessage('Full name is required')
+    .isLength({ min: 3 }).withMessage('Full name should be more than 3 characters')
+    .trim()
+    .customSanitizer(value => {
+      return value
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    }),
+
+  body('bloodType')
+    .notEmpty().withMessage('Blood type is required')
+    .isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
+    .withMessage('Invalid blood type'),
+
+  body('phone')
+    .notEmpty().withMessage('Phone number is required')
+    .isLength({ min: 10 }).withMessage('Phone number should be at least 10 digits')
+    .matches(/^\+?[0-9]{10,15}$/).withMessage('Invalid phone number')
+    .trim(),
+
+  body('lastDonationDate')
+    .optional({ checkFalsy: true }) // allow empty if user hasn’t donated
+    .isISO8601().withMessage('Invalid date format') // ensure valid date
+    .custom(value => {
+      const inputDate = new Date(value);
+      const today = new Date();
+
+      if (inputDate > today) {
+        throw new Error('Last donation date cannot be in the future');
+      }
+      return true;
+    }),
+
+  body('eventModel')
+    .notEmpty().withMessage('Event Model is required')
+];
 
 
 module.exports = {
@@ -161,5 +201,6 @@ module.exports = {
   getDistanceTimeValidationRules,
   orgRegistrationValidationRules,
   orgSigninValidationRules,
-  updatePasswordValidation
+  updatePasswordValidation,
+  donationForm
 };

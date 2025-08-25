@@ -16,7 +16,7 @@ router.get("/yourstory", userController.yourStory);
 router.delete("/story/:storyId", userController.deleteStory);
 router.put("/story/:storyId", userController.updateStory);
 
-router.post('/donate-blood-form/:eventId',userController.donateBloodform);
+router.post('/donate-blood-form/:eventId',validate.donationForm,userController.donateBloodform);
 router.get('/donate-blood-form/:eventId',userController.getDonateBloodFormEvent);
 router.get('/donate-blood-forms',userController.getDonateBloodForms);
 router.delete('/donate-blood-form',userController.deleteDonateBloodForm);

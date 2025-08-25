@@ -13,13 +13,13 @@ const SignUp = () => {
     const [fullname, setFullname] = useState('');
     const [msg, setMsg] = useState('');
 
-    const onSubmitHandler = async(e)=>{
+    const onSubmitHandler = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/signup`,{
-                email,fullname,password
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/signup`, {
+                email, fullname, password
             });
-            if(response.status === 201){
+            if (response.status === 201) {
                 localStorage.setItem("token", response.data.token);
                 navigate("/");
                 setEmail('');
@@ -28,23 +28,23 @@ const SignUp = () => {
             }
         } catch (error) {
             if (error.response) {
-        setMsg(error.response.data.msg || "Something went wrong")
-        return
-      } else {
-        setMsg("Network error. Please try again.");
-        return
-      }
+                setMsg(error.response.data.msg || "Something went wrong")
+                return
+            } else {
+                setMsg("Network error. Please try again.");
+                return
+            }
         }
     }
     return (
         <div className='flex'>
             <div className='bg-white dark:bg-[#121212] h-screen w-full flex flex-col justify-center items-center gap-4 '>
-                <img src={redlogo} alt="Logo" className='w-40 fixed p-3 top-2 left-2' />
+                <img src={redlogo} alt="Logo" className='w-40 fixed p-3 top-2 left-2 hover:cursor-pointer ' onClick={()=>{navigate("/")}} />
                 <h3 className='text-2xl font-semibold dark:text-[#B0B0B0] '>Create a new account</h3>
                 <form className='flex flex-col gap-3 w-full justify-center items-center p-5'>
-                    <Input1 placeholderText='FULLNAME' type="text" value={fullname} id="fullname" onChange={(e)=>{setFullname(e.target.value)}} />
-                    <Input1 placeholderText='EMAIL' type="email" value={email} id="email" onChange={(e)=>{setEmail(e.target.value)}} />
-                    <Input1 placeholderText='PASSWORD' type="password" id="password" value={password} onChange={(e)=>{setPassword(e.target.value)}} />
+                    <Input1 placeholderText='FULLNAME' type="text" value={fullname} id="fullname" onChange={(e) => { setFullname(e.target.value) }} />
+                    <Input1 placeholderText='EMAIL' type="email" value={email} id="email" onChange={(e) => { setEmail(e.target.value) }} />
+                    <Input1 placeholderText='PASSWORD' type="password" id="password" value={password} onChange={(e) => { setPassword(e.target.value) }} />
                     <h6 className='text-sm text-red-600'>{msg}</h6>
                     <Button1 text="Sign Up" onClick={onSubmitHandler} />
                     <p className='text-xs font-normal dark:text-[#808080]'>Already have a account? <Link to='/signin' className='text-blue-600'>Sign in</Link></p>

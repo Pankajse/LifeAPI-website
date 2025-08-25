@@ -49,6 +49,7 @@ const EventsCard = ({ event }) => {
     const [openDescription, setOpenDescription] = useState(false);
     const [formId, setFormId] = useState('');
     const [copied, setCopied] = useState(false);
+    const [message, setMessage] = useState('');
     const link = `http://localhost:5173/event/${event.id}`;
     const [registerForm, setRegisterForm] = useState({
         fullname: "",
@@ -82,7 +83,13 @@ const EventsCard = ({ event }) => {
                 setOpenRegisterCard(false);
             }
         } catch (error) {
-            console.log("Error submitting donate blood form " + error);
+            if (error.response) {
+                setMessage(error.response.data.message || "Something went wrong")
+                return
+            } else {
+                setMessage("Network error. Please try again.");
+                return
+            }
         }
     }
     const formDeleteHandler = async () => {
@@ -231,6 +238,9 @@ const EventsCard = ({ event }) => {
                 ))}
 
             </div>
+            <h5 className='text-red-600'>
+                {message}
+            </h5>
             <button
                 disabled={formSubmitted}
                 className={`text-white hover:cursor-pointer flex gap-2 items-center justify-center px-2 w-full sm:w-fit h-8 

@@ -42,7 +42,7 @@ const Signin = () => {
   return (
     <div className='flex'>
       <div className='bg-white dark:bg-[#121212] h-screen w-full flex flex-col justify-center items-center gap-4 '>
-        <img src={redlogo} alt="Logo" className='w-40 fixed p-3 top-2 left-2' />
+        <img src={redlogo} alt="Logo" className='w-40 fixed p-3 top-2 left-2 hover:cursor-pointer ' onClick={()=>{navigate("/")}} />
         <h3 className='text-2xl font-semibold dark:text-[#B0B0B0] '>Log in to your account</h3>
         <form className='flex flex-col gap-3 w-full justify-center items-center p-5'>
           <Input1 placeholderText='EMAIL' type="email" id="email" value={email} onChange={(e) => { setEmail(e.target.value) }} />

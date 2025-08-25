@@ -8,6 +8,7 @@ const RegisterForCenter = () => {
     const [org, setOrg] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [formId, setFormId] = useState(null);
+    const [message, setMessage] = useState('');
     const [registerForm, setRegisterForm] = useState({
         fullname: "",
         bloodType: "",
@@ -56,8 +57,14 @@ const RegisterForCenter = () => {
                 setFormId(response.data?.donateForm?._id);
                 setShowForm(false);
             }
-        } catch (err) {
-            console.error("Error registering", err);
+        } catch (error) {
+            if (error.response) {
+                setMessage(error.response.data.message || "Something went wrong")
+                return
+            } else {
+                setMessage("Network error. Please try again.");
+                return
+            }
         }
     };
 
@@ -175,6 +182,7 @@ const RegisterForCenter = () => {
                                 placeholder="Phone Number"
                                 className="border p-2 w-full mb-3 rounded-lg"
                             />
+                            <h5 className="text-red-600">{message}</h5>
 
                             <div className="flex justify-between mt-4">
                                 <button

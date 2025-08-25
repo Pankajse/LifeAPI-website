@@ -101,7 +101,7 @@ const EventPage = () => {
     return (
         <section id="events" className='flex flex-col gap-12 justify-center items-center scroll-mt-20 my-14 sm:px-16 lg:px-20 xl:px-36 px-4'>
             <h2 className='text-3xl sm:text-4xl font-bold'>Upcoming Blood Drives</h2>
-            <h5 className='text-xl sm:text-2xl text-[#696969] font-normal md:w-[850px] text-center '>Join us at community blood drive events happening near you. These special events bring donation opportunities directly to your neighborhood.</h5>
+            <h5 className='text-xl sm:text-2xl text-[#696969] font-normal max-w-5xl text-center '>Join us at community blood drive events happening near you. These special events bring donation opportunities directly to your neighborhood.</h5>
             {/* parent div for filter events and events cards */}
             <div className='w-full flex flex-col lg:flex-row gap-8'>
                 {/* Filter enents */}
@@ -180,6 +180,7 @@ const EventsCard = ({ event }) => {
     })
     const [formSubmitted, setFormSubmitted] = useState(false)
     const [copied, setCopied] = useState(false);
+    const [message, setMessage] = useState('');
     const link = `http://localhost:5173/event/${event.id}`;
     const handleCopy = async () => {
         try {
@@ -213,7 +214,13 @@ const EventsCard = ({ event }) => {
                 setOpenRegisterCard(false);
             }
         } catch (error) {
-            console.log("Error submitting donate blood form " + error);
+            if (error.response) {
+                setMessage(error.response.data.message || "Something went wrong")
+                return
+            } else {
+                setMessage("Network error. Please try again.");
+                return
+            }
         }
     }
     const formDeleteHandler = async () => {
@@ -362,6 +369,7 @@ const EventsCard = ({ event }) => {
                 ))}
 
             </div>
+            <h5 className='text-red-600'>{message}</h5>
             <button
                 disabled={formSubmitted}
                 className={`text-white hover:cursor-pointer flex gap-2 items-center justify-center px-2 w-full sm:w-fit h-8 

@@ -128,11 +128,11 @@ const Eligibility = () => {
                     <div className='flex flex-col gap-3'>
                         {basicRequirements.map((requirement, i) => <div
                             key={i}
-                            className='flex gap-2 items-center'
+                            className='flex gap-2 sm:items-center'
                         >
                             <i className="ri-shield-check-line text-green-500 text-lg sm:text-xl"></i>
-                            <h6 className='text-xl sm:text-2xl font-semibold'>{requirement.type}:</h6>
-                            <p className='text-lg font-normal text-[#696969] '>{requirement.description}</p>
+                            <h6 className='text-lg sm:text-2xl font-semibold'>{requirement.type}:</h6>
+                            <p className='text-base sm:text-lg font-normal text-[#696969] '>{requirement.description}</p>
                         </div>)}
                     </div>
                     <h4>Before You Donate</h4>

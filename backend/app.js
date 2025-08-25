@@ -8,7 +8,7 @@ const locationRoutes = require("./routes/location.route");
 const bloodRoutes = require("./routes/blood.route")
 
 const app = express();
-mongoose.connect(process.env.DB_URL,{useNewUrlParser : true,useUnifiedTopology : true})
+mongoose.connect(process.env.DB_URL)
 .then(()=>{
     console.log("Connected to MongoDB");
 }).catch((err)=>{
