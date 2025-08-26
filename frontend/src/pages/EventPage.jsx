@@ -68,7 +68,7 @@ const EventPage = () => {
                     }
                 );
 
-                setEvents(res.data.events);
+                setEvents(res.data.events.slice(0,3));
             } catch (error) {
                 console.error("Error fetching filtered events:", error);
             }

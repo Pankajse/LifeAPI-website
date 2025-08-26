@@ -5,72 +5,63 @@ const OrgModel = require("../models/org.model");
 const RequestBloodModel = require("../models/requestBlood.model");
 const { getAddressCoordinates, getUsersInTheRadius, getOrgsInTheRadius, getDistanceTime } = require("./location.service");
 
+
 const getEvents = async (range, types, daysRange) => {
-    const query = {};
-    let events;
+  const query = {};
 
-    // ✅ type filter
-    if (types && types.length > 0) {
-        query.type = { $in: types };
-    }
+  // ✅ type filter
+if (Array.isArray(types)) {
+  if (types.length > 0) {
+    query.type = { $in: types };
+  } else {
+    // Empty array should mean "no events"
+    query.type = { $in: [] };
+  }
+}
 
-    // ✅ days filter
-    if (daysRange) {
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setDate(startDate.getDate() + Number(daysRange));
-        query.date = { $gte: startDate, $lte: endDate };
-        query.status = { $in: ['upcoming', 'ongoing'] };
-    }
+  // ✅ days filter
+  if (daysRange) {
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + Number(daysRange));
+    query.date = { $gte: startDate, $lte: endDate };
+    query.status = { $in: ['upcoming', 'ongoing'] };
+  }
 
-    // ✅ location + range filter
-    if (range && range.coordinates && range.radius) {
-        query.location = {
-            $near: {
-                $geometry: {
-                    type: "Point",
-                    coordinates: [range.coordinates.lng, range.coordinates.lat]
-                },
-                $maxDistance: range.radius * 1000 // KM → meters
-            }
-        };
-    } else {
-        events = await EventModel.find(query).sort({ date: 1 }).populate("organizerId", "orgName contactNumber email ");
-        const filteredEvents = events.map(event => ({
-            title: event.title,
-            date: event.date.toDateString(),
-            time: event.time,
-            venue: event.venue,
-            address: event.location.address,
-            organizer: event.organizerId.orgName,
-            goal: event.goal,
-            registered: event.registered,
-            progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
-            status: event.status,
-            description: event.description,
-            id: event._id
-        }));
-        return filteredEvents;
-    }
+  // ✅ location + range filter
+  if (range && range.coordinates && range.radius) {
+    query.location = {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [range.coordinates.lng, range.coordinates.lat]
+        },
+        $maxDistance: range.radius * 1000 // km → meters
+      }
+    };
+  }
 
-    events = await EventModel.find(query).sort({ date: 1 }).populate("organizerId", "orgName contactNumber email ");
-    const filteredEvents = events.map(event => ({
-        title: event.title,
-        date: event.date.toDateString(),
-        time: event.time,
-        venue: event.venue,
-        address: event.location.address,
-        organizer: event.organizerId.orgName,
-        goal: event.goal,
-        registered: event.registered,
-        progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
-        status: event.status,
-        description: event.description,
-        id: event._id
-    }));
-    return filteredEvents;
+  // ✅ Fetch events after all filters applied
+  const events = await EventModel.find(query)
+    .populate("organizerId", "orgName contactNumber email");
+
+  const filteredEvents = events.map(event => ({
+    title: event.title,
+    date: event.date.toDateString(),
+    time: event.time,
+    venue: event.venue,
+    address: event.location.address,
+    organizer: event.organizerId.orgName,
+    goal: event.goal,
+    registered: event.registered,
+    progress: Math.min((event.registered / event.goal) * 100, 100).toFixed(2),
+    status: event.status,
+    description: event.description,
+    id: event._id
+  }));
+
+  return filteredEvents;
 };
-
 
 
 const getEventById = async (eventId) => {
