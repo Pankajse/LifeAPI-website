@@ -8,7 +8,7 @@ const DonationCenters = () => {
     const [location, setLocation] = useState("");
     const [maxDistance, setMaxDistance] = useState("");
     const [centers, setCenters] = useState([{
-        orgId : "",
+        orgId: "",
         name: "",
         distance: null,
         address: "",
@@ -17,12 +17,10 @@ const DonationCenters = () => {
     }]);
 
     const onClickFindCenterHandler = async () => {
-        const centersResponse = await axios.post(`${import.meta.env.VITE_BASE_URL}/bloodServices/allOrgs`, {
-            location: location,
-            maxDistance: maxDistance
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+        const centersResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/bloodServices/allOrgs`, {
+            params: {
+                location: location,
+                maxDistance: maxDistance
             }
         });
         const centersData = centersResponse.data?.orgs.map((x) => ({
@@ -37,14 +35,10 @@ const DonationCenters = () => {
 
     useEffect(() => {
         const getCenters = async () => {
-            const centersResponse = await axios.post(`${import.meta.env.VITE_BASE_URL}/bloodServices/allOrgs`, {}, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            const centersResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/bloodServices/allOrgs`);
 
             const centersData = centersResponse.data?.orgs.map((x) => ({
-                orgId : x._id,
+                orgId: x._id,
                 name: x.orgName,
                 distance: null,
                 address: x.location.address,
@@ -94,13 +88,13 @@ const DonationCenters = () => {
                     <h6 className='text-base text-[#696969]'><i className="ri-phone-line mr-2">{center.mobile}</i></h6>
                     <h6 className='text-base text-[#696969]'><i className="ri-time-line mr-2"></i>{center.timings}</h6>
                     <div className='flex justify-center'>
-                        <button 
-                        onClick={()=>{
-                            navigate(`/org/${center.orgId}`)
-                        }}
-                        className='text-white text-lg font-medium hover:cursor-pointer py-1 px-2 w-2xs bg-red-600 hover:bg-red-700 transition-all duration-200 rounded-full '>
-                        Book Now
-                    </button>
+                        <button
+                            onClick={() => {
+                                navigate(`/org/${center.orgId}`)
+                            }}
+                            className='text-white text-lg font-medium hover:cursor-pointer py-1 px-2 w-2xs bg-red-600 hover:bg-red-700 transition-all duration-200 rounded-full '>
+                            Book Now
+                        </button>
                     </div>
                 </div>)}
             </div>

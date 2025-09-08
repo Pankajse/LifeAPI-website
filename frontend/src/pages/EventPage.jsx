@@ -30,13 +30,10 @@ const EventPage = () => {
                         types: filterDetails.eventTypes,
                     };
 
-                    const res = await axios.post(
+                    const res = await axios.get(
                         `${import.meta.env.VITE_BASE_URL}/bloodServices/events`,
-                        payload,
                         {
-                            headers: {
-                                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                            },
+                            params: payload
                         }
                     );
 
@@ -58,17 +55,14 @@ const EventPage = () => {
                     types: filterDetails.eventTypes,
                 };
 
-                const res = await axios.post(
+                const res = await axios.get(
                     `${import.meta.env.VITE_BASE_URL}/bloodServices/events`,
-                    payload,
                     {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
+                        params: payload
                     }
                 );
 
-                setEvents(res.data.events.slice(0,3));
+                setEvents(res.data.events.slice(0, 3));
             } catch (error) {
                 console.error("Error fetching filtered events:", error);
             }

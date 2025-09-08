@@ -5,7 +5,9 @@ const StoryModel = require("../models/story.model");
 
 module.exports.getEvents = async (req, res) => {
     try {
-        const {range , types, daysRange} = req.body;
+        let {range , types, daysRange} = req.query;
+        range = range ? parseInt(range) : 2000;
+        daysRange = daysRange ? parseInt(daysRange) : 200;
         const events = await bloodServices.getEvents( range, types, daysRange);
         if (!events) {
             return res.status(404).json({ msg: "No events found" });
@@ -38,12 +40,13 @@ module.exports.getEventById = async (req, res) => {
 
 module.exports.allOrgs = async (req, res) => {
     try {
-        const {location, maxDistance} = req.body;
+        let {location, maxDistance} = req.query;
         const query = {};
         if (location) {
             query.location = location;
         }
         if (maxDistance) {
+            maxDistance = parseInt(maxDistance);
             query.maxDistance = maxDistance;
         }else{
             query.maxDistance = 100;

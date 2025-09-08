@@ -4,9 +4,9 @@ const bloodController = require("../controllers/blood.controller");
 const router = express.Router();
 
 
-router.post("/events", bloodController.getEvents);
+router.get("/events", bloodController.getEvents);
 router.get("/events/:eventId", bloodController.getEventById);
-router.post("/allOrgs", bloodController.allOrgs);
+router.get("/allOrgs", bloodController.allOrgs);
 router.get("/org/:orgId", bloodController.getOrgById);
 router.get("/stories", bloodController.getAllStories);
 
