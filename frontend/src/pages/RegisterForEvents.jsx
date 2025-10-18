@@ -50,7 +50,7 @@ const EventsCard = ({ event }) => {
     const [formId, setFormId] = useState('');
     const [copied, setCopied] = useState(false);
     const [message, setMessage] = useState('');
-    const link = `http://localhost:5173/event/${event.id}`;
+    const link = `${import.meta.env.VITE_BASE_URL}/${event.id}`;
     const [registerForm, setRegisterForm] = useState({
         fullname: "",
         bloodType: "",
