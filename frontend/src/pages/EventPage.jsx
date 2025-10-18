@@ -175,7 +175,7 @@ const EventsCard = ({ event }) => {
     const [formSubmitted, setFormSubmitted] = useState(false)
     const [copied, setCopied] = useState(false);
     const [message, setMessage] = useState('');
-    const link = `http://localhost:5173/event/${event.id}`;
+    const link = `${window.location.origin}/${event.id}`;
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(link);
